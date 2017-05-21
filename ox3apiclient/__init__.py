@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import ConfigParser
-import cookielib
+import configparser
+import http.cookiejar
 import logging
 import mimetypes
 from pprint import pformat
 import random
 import json
-from urlparse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse
 
 import requests
 from requests_oauthlib import OAuth1
@@ -114,12 +114,12 @@ class Client(object):
         self.logger.debug('====={0:=<45}'.format('OX3 api call started'))
         self.logger.debug("%s %s" % (response.request.method, response.request.url))
         self.logger.debug('====={0:=<45}'.format('OX3 api call request headers'))
-        for k, v in response.request.headers.items():
+        for k, v in list(response.request.headers.items()):
             self.logger.debug("%s: %s" % (k, v))
         self.logger.debug('====={0:=<45}'.format('OX3 api call request body'))
         self.logger.debug("%s" % response.request.body)
         self.logger.debug('====={0:=<45}'.format('OX3 api call response headers'))
-        for k, v in response.headers.items():
+        for k, v in list(response.headers.items()):
             self.logger.debug("%s: %s" % (k, v))
         self.logger.debug('====={0:=<45}'.format('OX3 api call response body'))
         try:
@@ -221,7 +221,7 @@ class Client(object):
 
         # We need to store our access token as the openx3_access_token cookie.
         # This cookie will be passed to all future API requests.
-        cookie = cookielib.Cookie(
+        cookie = http.cookiejar.Cookie(
             version=0,
             name='openx3_access_token',
             value=self._token,
@@ -422,7 +422,7 @@ def client_from_file(file_path='.ox3rc', env=None):
     env -- the env section to load. Default will be first env section.
 
     """
-    cp = ConfigParser.RawConfigParser()
+    cp = configparser.RawConfigParser()
     cp.read(file_path)
 
     # Load default env if no env is specified. The default env is just the first
@@ -442,7 +442,7 @@ def client_from_file(file_path='.ox3rc', env=None):
     try:
         for param in required_params:
             client_params[param] = cp.get(env, param)
-    except ConfigParser.NoOptionError:
+    except configparser.NoOptionError:
         err_msg = "Missing required option: '%s'" % param
         raise Exception(err_msg)
 
@@ -474,7 +474,7 @@ def client_from_file(file_path='.ox3rc', env=None):
 
             client.__dict__[prop] = cp.get(env, param)
 
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             pass
 
     return client

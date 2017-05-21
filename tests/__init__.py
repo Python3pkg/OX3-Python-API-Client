@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from clientfromfile import *
-from client import *
+from .clientfromfile import *
+from .client import *
